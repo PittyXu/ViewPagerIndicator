@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -35,6 +36,9 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * across different configurations or circumstances.
  */
 public class IconCenterPageIndicator extends HorizontalScrollView implements PageIndicator {
+    /** Title text used when no title is provided by the adapter. */
+    private static final CharSequence EMPTY_TITLE = "";
+
     /**
      * Interface for a callback when the selected tab has been reselected.
      */
@@ -207,12 +211,15 @@ public class IconCenterPageIndicator extends HorizontalScrollView implements Pag
         }
         final int count = adapter.getCount();
         for (int i = 0; i < count; i++) {
-
+            CharSequence title = adapter.getPageTitle(i);
+            if (title == null) {
+                title = EMPTY_TITLE;
+            }
             int iconResId = 0;
             if (iconAdapter != null) {
                 iconResId = iconAdapter.getIconResId(i);
             }
-            addTab(i, iconResId);
+            addTab(i, title, iconResId);
         }
         if (mSelectedTabIndex > count) {
             mSelectedTabIndex = count - 1;
@@ -251,15 +258,40 @@ public class IconCenterPageIndicator extends HorizontalScrollView implements Pag
         mListener = listener;
     }
 
-    private class TabView extends ImageView {
+    private class TabView extends LinearLayout {
         private int mIndex;
+        private ImageView mIcon;
+        private TextView mPageTitle;
 
         public TabView(Context context) {
-            super(context);
+            super(context, null, R.attr.iconTabViewStyle);
+            mIcon = new ImageView(context, null, R.attr.iconTabViewIconStyle);
+            mPageTitle = new TextView(context, null, R.attr.iconTabViewTextStyle);
+            addView(mIcon);
+            addView(mPageTitle);
+        }
+
+        @Override
+        public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+            // Re-measure if we went beyond our maximum size.
+            if (mMaxTabWidth > 0 && getMeasuredWidth() > mMaxTabWidth) {
+                super.onMeasure(MeasureSpec.makeMeasureSpec(mMaxTabWidth, MeasureSpec.EXACTLY),
+                        heightMeasureSpec);
+            }
         }
 
         public int getIndex() {
             return mIndex;
+        }
+
+        public void setText(CharSequence text) {
+            mPageTitle.setText(text);
+        }
+
+        public void setImageResource(int iconResId) {
+            mIcon.setImageResource(iconResId);
         }
     }
 }
