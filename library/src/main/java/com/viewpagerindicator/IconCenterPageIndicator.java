@@ -16,7 +16,9 @@
  */
 package com.viewpagerindicator;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -263,6 +265,7 @@ public class IconCenterPageIndicator extends HorizontalScrollView implements Pag
         private ImageView mIcon;
         private TextView mPageTitle;
 
+        @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         public TabView(Context context) {
             super(context, null, R.attr.iconTabViewStyle);
             mIcon = new ImageView(context, null, R.attr.iconTabViewIconStyle);
